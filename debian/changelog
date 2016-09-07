@@ -1,3 +1,9 @@
+openjpeg (1:1.5.2-3scibian1) jessie; urgency=low
+
+  * Require empty /etc/library-support/openjpeg.enabled file to enable the library 
+
+ -- Scibian Packaging Team <packaging@scibian.org>  Wed, 07 Sep 2016 14:54:43 +0200
+
 openjpeg (1:1.5.2-3) unstable; urgency=medium
 
   * epoch upload to resolve #760874 completely
