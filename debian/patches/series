@@ -1,3 +1,4 @@
 defaulttmpfile.patch
 javavers.patch
 getopt.patch
+library-support-flag.patch

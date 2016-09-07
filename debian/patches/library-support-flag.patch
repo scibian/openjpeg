@@ -1,0 +1,65 @@
+Description: Require empty /etc/library-support/openjpeg.enabled file to enable the library
+Author: Scibian Packaging Team <packaging@scibian.org>
+
+--- a/libopenjpeg/openjpeg.c
++++ b/libopenjpeg/openjpeg.c
+@@ -28,6 +28,9 @@
+ #include <windows.h>
+ #endif /* _WIN32 */
+ 
++#include <sys/stat.h>
++#include <errno.h>
++
+ #include "opj_config.h"
+ #include "opj_includes.h"
+ 
+@@ -57,6 +60,16 @@
+ 
+ /* ---------------------------------------------------------------------- */
+ 
++opj_bool OPJ_CALLCONV check_librarysupport(opj_common_ptr *cinfo) {
++	struct stat lsf;
++	errno = 0;
++	if (stat("/etc/library-support/openjpeg.enabled", &lsf) == -1 && errno == ENOENT) {
++		opj_event_msg(cinfo, EVT_WARNING, "OpenJPEG support not enabled\n"
++		"Create an empty /etc/library-support/openjpeg.enabled file to do so.\n");
++		return OPJ_FALSE;
++	}
++	return OPJ_TRUE;
++}
+ 
+ const char* OPJ_CALLCONV opj_version(void) {
+     return PACKAGE_VERSION;
+@@ -154,10 +167,14 @@
+ }
+ 
+ opj_image_t* OPJ_CALLCONV opj_decode(opj_dinfo_t *dinfo, opj_cio_t *cio) {
++	if (check_librarysupport((opj_common_ptr)dinfo) == OPJ_FALSE)
++		return NULL;
+ 	return opj_decode_with_info(dinfo, cio, NULL);
+ }
+ 
+ opj_image_t* OPJ_CALLCONV opj_decode_with_info(opj_dinfo_t *dinfo, opj_cio_t *cio, opj_codestream_info_t *cstr_info) {
++	if (check_librarysupport((opj_common_ptr)dinfo) == OPJ_FALSE)
++		return NULL;
+ 	if(dinfo && cio) {
+ 		switch(dinfo->codec_format) {
+ 			case CODEC_J2K:
+@@ -303,6 +320,8 @@
+ }
+ 
+ opj_bool OPJ_CALLCONV opj_encode(opj_cinfo_t *cinfo, opj_cio_t *cio, opj_image_t *image, char *index) {
++	if (check_librarysupport((opj_common_ptr)cinfo) == OPJ_FALSE)
++		return NULL;
+ 	if (index != NULL)
+ 		opj_event_msg((opj_common_ptr)cinfo, EVT_WARNING, "Set index to NULL when calling the opj_encode function.\n"
+ 		"To extract the index, use the opj_encode_with_info() function.\n"
+@@ -311,6 +330,8 @@
+ }
+ 
+ opj_bool OPJ_CALLCONV opj_encode_with_info(opj_cinfo_t *cinfo, opj_cio_t *cio, opj_image_t *image, opj_codestream_info_t *cstr_info) {
++	if (check_librarysupport((opj_common_ptr)cinfo) == OPJ_FALSE)
++		return NULL;
+ 	if(cinfo && cio && image) {
+ 		switch(cinfo->codec_format) {
+ 			case CODEC_J2K:
